@@ -76,7 +76,6 @@ describe('operators', function () {
     it('includes snowflake-specific operators', function () {
         $reflection = new ReflectionClass($this->grammar);
         $property = $reflection->getProperty('operators');
-        $property->setAccessible(true);
         $operators = $property->getValue($this->grammar);
 
         expect($operators)->toContain('ilike');

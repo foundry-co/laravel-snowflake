@@ -25,7 +25,6 @@ describe('column types', function () {
         $column = new Fluent(['type' => 'variant', 'name' => 'data']);
 
         $method = new ReflectionMethod($this->grammar, 'typeVariant');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('VARIANT');
     });
@@ -34,7 +33,6 @@ describe('column types', function () {
         $column = new Fluent(['type' => 'object', 'name' => 'metadata']);
 
         $method = new ReflectionMethod($this->grammar, 'typeObject');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('OBJECT');
     });
@@ -43,7 +41,6 @@ describe('column types', function () {
         $column = new Fluent(['type' => 'array', 'name' => 'tags']);
 
         $method = new ReflectionMethod($this->grammar, 'typeArray');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('ARRAY');
     });
@@ -52,7 +49,6 @@ describe('column types', function () {
         $column = new Fluent(['type' => 'geography', 'name' => 'location']);
 
         $method = new ReflectionMethod($this->grammar, 'typeGeography');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('GEOGRAPHY');
     });
@@ -61,7 +57,6 @@ describe('column types', function () {
         $column = new Fluent(['type' => 'geometry', 'name' => 'shape']);
 
         $method = new ReflectionMethod($this->grammar, 'typeGeometry');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('GEOMETRY');
     });
@@ -72,7 +67,6 @@ describe('timestamp types', function () {
         $column = new Fluent(['type' => 'timestampNtz']);
 
         $method = new ReflectionMethod($this->grammar, 'typeTimestampNtz');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('TIMESTAMP_NTZ');
     });
@@ -81,7 +75,6 @@ describe('timestamp types', function () {
         $column = new Fluent(['type' => 'timestampLtz']);
 
         $method = new ReflectionMethod($this->grammar, 'typeTimestampLtz');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('TIMESTAMP_LTZ');
     });
@@ -90,7 +83,6 @@ describe('timestamp types', function () {
         $column = new Fluent(['type' => 'timestampTz']);
 
         $method = new ReflectionMethod($this->grammar, 'typeTimestampTz');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('TIMESTAMP_TZ');
     });
@@ -101,7 +93,6 @@ describe('identity column', function () {
         $column = new Fluent(['type' => 'identity', 'start' => 1, 'increment' => 1]);
 
         $method = new ReflectionMethod($this->grammar, 'typeIdentity');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('INTEGER IDENTITY(1, 1)');
     });
@@ -110,7 +101,6 @@ describe('identity column', function () {
         $column = new Fluent(['type' => 'identity', 'start' => 100, 'increment' => 10]);
 
         $method = new ReflectionMethod($this->grammar, 'typeIdentity');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('INTEGER IDENTITY(100, 10)');
     });
@@ -121,7 +111,6 @@ describe('number type', function () {
         $column = new Fluent(['type' => 'number', 'precision' => 10, 'scale' => 2]);
 
         $method = new ReflectionMethod($this->grammar, 'typeNumber');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('NUMBER(10, 2)');
     });
@@ -132,7 +121,6 @@ describe('ulid type', function () {
         $column = new Fluent(['type' => 'ulid']);
 
         $method = new ReflectionMethod($this->grammar, 'typeUlid');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('CHAR(26)');
     });
@@ -143,7 +131,6 @@ describe('json type', function () {
         $column = new Fluent(['type' => 'json']);
 
         $method = new ReflectionMethod($this->grammar, 'typeJson');
-        $method->setAccessible(true);
 
         expect($method->invoke($this->grammar, $column))->toBe('VARIANT');
     });
