@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use FoundryCo\Snowflake\Auth\JwtTokenProvider;
 use FoundryCo\Snowflake\Client\Exceptions\AuthenticationException;
-use FoundryCo\Snowflake\Enums\AuthMethod;
 
 describe('JwtTokenProvider', function () {
     beforeEach(function () {
@@ -15,8 +14,8 @@ describe('JwtTokenProvider', function () {
         );
     });
 
-    it('returns jwt auth method', function () {
-        expect($this->provider->getAuthMethod())->toBe(AuthMethod::Jwt);
+    it('returns keypair jwt token type', function () {
+        expect($this->provider->getTokenType())->toBe('KEYPAIR_JWT');
     });
 
     it('generates a valid jwt token', function () {
@@ -25,7 +24,6 @@ describe('JwtTokenProvider', function () {
         expect($token)->toBeString();
         expect($token)->not->toBeEmpty();
 
-        // JWT tokens have 3 parts separated by dots
         $parts = explode('.', $token);
         expect($parts)->toHaveCount(3);
     });
@@ -34,7 +32,6 @@ describe('JwtTokenProvider', function () {
         $token1 = $this->provider->getToken();
         $token2 = $this->provider->getToken();
 
-        // Same token should be returned (cached)
         expect($token1)->toBe($token2);
     });
 
@@ -51,9 +48,6 @@ describe('JwtTokenProvider', function () {
         $this->provider->refresh();
         $token2 = $this->provider->getToken();
 
-        // After refresh, a new token should be generated
-        // (iat timestamp will be different)
-        // Note: tokens might be identical if generated in same second
         expect($token2)->toBeString();
     });
 
@@ -113,26 +107,5 @@ describe('JwtTokenProvider', function () {
             expect(fn () => JwtTokenProvider::fromConfig($config))
                 ->toThrow(AuthenticationException::class, 'user is required');
         });
-    });
-});
-
-describe('AuthMethod enum', function () {
-    it('returns correct token type for jwt', function () {
-        expect(AuthMethod::Jwt->tokenType())->toBe('KEYPAIR_JWT');
-    });
-
-    it('returns correct token type for oauth', function () {
-        expect(AuthMethod::OAuth->tokenType())->toBe('OAUTH');
-    });
-
-    it('creates from valid string', function () {
-        expect(AuthMethod::fromString('jwt'))->toBe(AuthMethod::Jwt);
-        expect(AuthMethod::fromString('JWT'))->toBe(AuthMethod::Jwt);
-        expect(AuthMethod::fromString('oauth'))->toBe(AuthMethod::OAuth);
-    });
-
-    it('throws on invalid string', function () {
-        expect(fn () => AuthMethod::fromString('invalid'))
-            ->toThrow(InvalidArgumentException::class);
     });
 });

@@ -9,12 +9,6 @@ use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    /**
-     * Get package providers.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return array<int, class-string>
-     */
     protected function getPackageProviders($app): array
     {
         return [
@@ -22,11 +16,6 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    /**
-     * Define environment setup.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     */
     protected function defineEnvironment($app): void
     {
         $app['config']->set('database.default', 'snowflake');
@@ -37,17 +26,12 @@ abstract class TestCase extends BaseTestCase
             'database' => 'TEST_DB',
             'schema' => 'PUBLIC',
             'role' => 'SYSADMIN',
-            'prefix' => '',
             'auth' => [
-                'method' => 'jwt',
                 'jwt' => [
                     'user' => 'TEST_USER',
                     'private_key_path' => __DIR__ . '/Fixtures/test_rsa_key.pem',
-                    'private_key_passphrase' => null,
                 ],
             ],
-            'timeout' => 0,
-            'async_polling_interval' => 100,
         ]);
     }
 }

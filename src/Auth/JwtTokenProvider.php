@@ -6,22 +6,13 @@ namespace FoundryCo\Snowflake\Auth;
 
 use Firebase\JWT\JWT;
 use FoundryCo\Snowflake\Client\Exceptions\AuthenticationException;
-use FoundryCo\Snowflake\Enums\AuthMethod;
 use OpenSSLAsymmetricKey;
 
 final class JwtTokenProvider implements TokenProvider
 {
     private ?string $cachedToken = null;
     private ?int $tokenExpiry = null;
-
-    /**
-     * Buffer time in seconds before expiry to refresh the token.
-     */
     private const REFRESH_BUFFER_SECONDS = 300;
-
-    /**
-     * Maximum token lifetime in seconds (Snowflake limit is 1 hour).
-     */
     private const TOKEN_LIFETIME_SECONDS = 3600;
 
     public function __construct(
@@ -36,9 +27,6 @@ final class JwtTokenProvider implements TokenProvider
         }
     }
 
-    /**
-     * Create from configuration array.
-     */
     public static function fromConfig(array $config): self
     {
         $account = $config['account'] ?? throw new AuthenticationException('Snowflake account is required');
@@ -57,16 +45,16 @@ final class JwtTokenProvider implements TokenProvider
 
     public function getToken(): string
     {
-        if ($this->shouldRefresh()) {
+        if (! $this->isValid()) {
             $this->refresh();
         }
 
         return $this->cachedToken;
     }
 
-    public function getAuthMethod(): AuthMethod
+    public function getTokenType(): string
     {
-        return AuthMethod::Jwt;
+        return 'KEYPAIR_JWT';
     }
 
     public function refresh(): void
@@ -74,7 +62,6 @@ final class JwtTokenProvider implements TokenProvider
         $privateKey = $this->loadPrivateKey();
         $publicKeyFingerprint = $this->getPublicKeyFingerprint($privateKey);
 
-        // Normalize account identifier (replace dots with hyphens for org-account format)
         $accountIdentifier = strtoupper(str_replace('.', '-', $this->account));
         $userIdentifier = strtoupper($this->user);
 
@@ -101,16 +88,11 @@ final class JwtTokenProvider implements TokenProvider
         return time() < ($this->tokenExpiry - self::REFRESH_BUFFER_SECONDS);
     }
 
-    /**
-     * Load the private key from content or file.
-     */
     private function loadPrivateKey(): OpenSSLAsymmetricKey
     {
-        // Use direct key content if provided (e.g., from 1Password)
         if ($this->privateKey !== null) {
             $keyContent = $this->privateKey;
         } else {
-            // Fall back to reading from file
             if (! file_exists($this->privateKeyPath)) {
                 throw new AuthenticationException("Private key file not found: {$this->privateKeyPath}");
             }
@@ -132,9 +114,6 @@ final class JwtTokenProvider implements TokenProvider
         return $privateKey;
     }
 
-    /**
-     * Calculate the SHA256 fingerprint of the public key.
-     */
     private function getPublicKeyFingerprint(OpenSSLAsymmetricKey $privateKey): string
     {
         $details = openssl_pkey_get_details($privateKey);
@@ -149,9 +128,6 @@ final class JwtTokenProvider implements TokenProvider
         return base64_encode(hash('sha256', $publicKeyDer, true));
     }
 
-    /**
-     * Convert PEM format to DER format.
-     */
     private function pemToDer(string $pem): string
     {
         $lines = explode("\n", $pem);
@@ -165,13 +141,5 @@ final class JwtTokenProvider implements TokenProvider
         }
 
         return base64_decode($der);
-    }
-
-    /**
-     * Check if token needs refresh.
-     */
-    private function shouldRefresh(): bool
-    {
-        return ! $this->isValid();
     }
 }

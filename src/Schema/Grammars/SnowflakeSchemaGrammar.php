@@ -4,42 +4,24 @@ declare(strict_types=1);
 
 namespace FoundryCo\Snowflake\Schema\Grammars;
 
-use Illuminate\Database\Connection;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\Grammar;
 use Illuminate\Support\Fluent;
 
-/**
- * Snowflake schema grammar for DDL statements.
- */
 class SnowflakeSchemaGrammar extends Grammar
 {
-    /**
-     * The possible column modifiers.
-     *
-     * @var string[]
-     */
     protected $modifiers = ['Collate', 'Nullable', 'Default', 'Comment'];
 
-    /**
-     * Compile a create database command.
-     */
     public function compileCreateDatabase($name): string
     {
         return sprintf('CREATE DATABASE IF NOT EXISTS %s', $this->wrapValue($name));
     }
 
-    /**
-     * Compile a drop database if exists command.
-     */
     public function compileDropDatabaseIfExists($name): string
     {
         return sprintf('DROP DATABASE IF EXISTS %s', $this->wrapValue($name));
     }
 
-    /**
-     * Compile a create table command.
-     */
     public function compileCreate(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -49,9 +31,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile an add column command.
-     */
     public function compileAdd(Blueprint $blueprint, Fluent $command): string
     {
         $columns = $this->prefixArray('ADD COLUMN', $this->getColumns($blueprint));
@@ -59,9 +38,6 @@ class SnowflakeSchemaGrammar extends Grammar
         return 'ALTER TABLE ' . $this->wrapTable($blueprint) . ' ' . implode(', ', $columns);
     }
 
-    /**
-     * Compile a drop column command.
-     */
     public function compileDropColumn(Blueprint $blueprint, Fluent $command): string
     {
         $columns = $this->prefixArray('DROP COLUMN', $this->wrapArray($command->columns));
@@ -69,9 +45,6 @@ class SnowflakeSchemaGrammar extends Grammar
         return 'ALTER TABLE ' . $this->wrapTable($blueprint) . ' ' . implode(', ', $columns);
     }
 
-    /**
-     * Compile a rename column command.
-     */
     public function compileRenameColumn(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -82,9 +55,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a change column command.
-     */
     public function compileChange(Blueprint $blueprint, Fluent $command): array
     {
         $changes = [];
@@ -103,9 +73,6 @@ class SnowflakeSchemaGrammar extends Grammar
         return $changes;
     }
 
-    /**
-     * Compile a primary key command.
-     */
     public function compilePrimary(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -115,9 +82,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a unique key command.
-     */
     public function compileUnique(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -128,21 +92,11 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile an index command.
-     *
-     * Note: Snowflake doesn't have traditional indexes. This is a no-op.
-     */
     public function compileIndex(Blueprint $blueprint, Fluent $command): ?string
     {
-        // Snowflake doesn't support CREATE INDEX
-        // Use clustering keys instead via compileClusterBy
         return null;
     }
 
-    /**
-     * Compile a foreign key command.
-     */
     public function compileForeign(Blueprint $blueprint, Fluent $command): string
     {
         $sql = sprintf(
@@ -165,9 +119,6 @@ class SnowflakeSchemaGrammar extends Grammar
         return $sql;
     }
 
-    /**
-     * Compile a drop foreign key command.
-     */
     public function compileDropForeign(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -177,9 +128,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a drop primary key command.
-     */
     public function compileDropPrimary(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -188,9 +136,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a drop unique key command.
-     */
     public function compileDropUnique(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -200,25 +145,16 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a drop table command.
-     */
     public function compileDrop(Blueprint $blueprint, Fluent $command): string
     {
         return 'DROP TABLE ' . $this->wrapTable($blueprint);
     }
 
-    /**
-     * Compile a drop table if exists command.
-     */
     public function compileDropIfExists(Blueprint $blueprint, Fluent $command): string
     {
         return 'DROP TABLE IF EXISTS ' . $this->wrapTable($blueprint);
     }
 
-    /**
-     * Compile a rename table command.
-     */
     public function compileRename(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -228,9 +164,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a clustering key command.
-     */
     public function compileClusterBy(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -240,9 +173,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a data retention command.
-     */
     public function compileDataRetention(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -252,9 +182,6 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile a sequence creation command.
-     */
     public function compileSequence(Blueprint $blueprint, Fluent $command): string
     {
         return sprintf(
@@ -265,27 +192,18 @@ class SnowflakeSchemaGrammar extends Grammar
         );
     }
 
-    /**
-     * Compile the query to retrieve tables.
-     */
     public function compileTables($schema): string
     {
         return "SELECT TABLE_NAME AS \"name\", TABLE_SCHEMA AS \"schema\", BYTES AS \"size\", ROW_COUNT AS \"rows\", COMMENT AS \"comment\" " .
             "FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = '{$schema}'";
     }
 
-    /**
-     * Compile the query to retrieve views.
-     */
     public function compileViews($schema): string
     {
         return "SELECT TABLE_NAME AS \"name\", TABLE_SCHEMA AS \"schema\", VIEW_DEFINITION AS \"definition\" " .
             "FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = '{$schema}'";
     }
 
-    /**
-     * Compile the query to retrieve columns.
-     */
     public function compileColumns($schema, $table): string
     {
         return "SELECT COLUMN_NAME AS \"name\", DATA_TYPE AS \"type_name\", IS_NULLABLE AS \"nullable\", COLUMN_DEFAULT AS \"default\", COMMENT AS \"comment\", " .
@@ -295,9 +213,6 @@ class SnowflakeSchemaGrammar extends Grammar
             'ORDER BY ORDINAL_POSITION';
     }
 
-    /**
-     * Compile the query to retrieve foreign keys.
-     */
     public function compileForeignKeys($schema, $table): string
     {
         return "SELECT " .
@@ -318,17 +233,10 @@ class SnowflakeSchemaGrammar extends Grammar
             "AND tc.CONSTRAINT_TYPE = 'FOREIGN KEY'";
     }
 
-    /**
-     * Compile the query to check if a table exists.
-     */
     public function compileTableExists($schema, $table): string
     {
         return "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{$schema}' AND TABLE_NAME = '{$table}'";
     }
-
-    // =====================================
-    // Type Definitions
-    // =====================================
 
     protected function typeChar(Fluent $column): string
     {
@@ -417,7 +325,6 @@ class SnowflakeSchemaGrammar extends Grammar
 
     protected function typeEnum(Fluent $column): string
     {
-        // Snowflake doesn't have ENUM - use VARCHAR with CHECK constraint
         return sprintf(
             'VARCHAR(%d)',
             max(array_map('strlen', $column->allowed)) + 10
@@ -542,10 +449,6 @@ class SnowflakeSchemaGrammar extends Grammar
         return "INTEGER IDENTITY({$start}, {$increment})";
     }
 
-    // =====================================
-    // Modifiers
-    // =====================================
-
     protected function modifyNullable(Blueprint $blueprint, Fluent $column): ?string
     {
         if ($column->nullable === false) {
@@ -582,27 +485,15 @@ class SnowflakeSchemaGrammar extends Grammar
         return null;
     }
 
-    // =====================================
-    // Helpers
-    // =====================================
-
-    /**
-     * Wrap table name with quotes.
-     */
-    public function wrapTable($table, $prefix = null): string
+    public function wrapTable($table): string
     {
         if ($table instanceof Blueprint) {
             $table = $table->getTable();
         }
 
-        $prefix = $prefix ?? $this->connection->getTablePrefix();
-
-        return '"' . str_replace('"', '""', $prefix . $table) . '"';
+        return '"' . str_replace('"', '""', $table) . '"';
     }
 
-    /**
-     * Wrap a value with keyword identifiers.
-     */
     protected function wrapValue($value): string
     {
         if ($value === '*') {
@@ -612,9 +503,6 @@ class SnowflakeSchemaGrammar extends Grammar
         return '"' . str_replace('"', '""', (string) $value) . '"';
     }
 
-    /**
-     * Get schema transactions support.
-     */
     public function supportsSchemaTransactions(): bool
     {
         return false;
