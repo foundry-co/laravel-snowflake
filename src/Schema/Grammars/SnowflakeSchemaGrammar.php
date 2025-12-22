@@ -485,7 +485,7 @@ class SnowflakeSchemaGrammar extends Grammar
         return null;
     }
 
-    public function wrapTable($table): string
+    public function wrapTable($table, $prefix = null): string
     {
         if ($table instanceof Blueprint) {
             $table = $table->getTable();
