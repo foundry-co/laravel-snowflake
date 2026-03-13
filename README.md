@@ -11,6 +11,7 @@ A Laravel database driver for Snowflake using the REST SQL API. No PHP extension
 - ULID primary keys optimized for Snowflake clustering
 - Native support for VARIANT, OBJECT, and ARRAY types
 - Large result set streaming via partitions
+- This fork adds pagination support for Laravel’s `getCountForPagination()` for count queries
 
 ## Requirements
 
@@ -71,6 +72,7 @@ Add the Snowflake connection to `config/database.php`:
         'auth' => [
             'jwt' => [
                 'user' => env('SNOWFLAKE_USER'),
+                'account_identifier' => env('SNOWFLAKE_ACCOUNT_IDENTIFIER'), // optional; use when account has region
                 'private_key_path' => env('SNOWFLAKE_PRIVATE_KEY_PATH'),
                 'private_key_passphrase' => env('SNOWFLAKE_PRIVATE_KEY_PASSPHRASE'),
             ],

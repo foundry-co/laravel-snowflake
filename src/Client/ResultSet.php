@@ -139,6 +139,11 @@ final class ResultSet implements IteratorAggregate
             $result->{$name} = $this->typeConverter->cast($rawValue, $type, $column);
         }
 
+        // Laravel's getCountForPagination() expects $row->aggregate; Snowflake returns uppercase column names.
+        if (isset($result->AGGREGATE) && ! isset($result->aggregate)) {
+            $result->aggregate = $result->AGGREGATE;
+        }
+
         return $result;
     }
 }

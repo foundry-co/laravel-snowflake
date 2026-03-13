@@ -21,6 +21,7 @@ final class JwtTokenProvider implements TokenProvider
         private readonly ?string $privateKeyPath = null,
         private readonly ?string $privateKey = null,
         private readonly ?string $privateKeyPassphrase = null,
+        private readonly ?string $accountIdentifierForJwt = null,
     ) {
         if ($this->privateKeyPath === null && $this->privateKey === null) {
             throw new AuthenticationException('Either private_key_path or private_key must be provided');
@@ -35,12 +36,13 @@ final class JwtTokenProvider implements TokenProvider
         $privateKeyPath = $config['auth']['jwt']['private_key_path'] ?? null;
         $privateKey = $config['auth']['jwt']['private_key'] ?? null;
         $passphrase = $config['auth']['jwt']['private_key_passphrase'] ?? null;
+        $accountIdentifierForJwt = $config['auth']['jwt']['account_identifier'] ?? $config['account_identifier'] ?? null;
 
         if ($privateKeyPath === null && $privateKey === null) {
             throw new AuthenticationException('Either private_key_path or private_key is required for JWT auth');
         }
 
-        return new self($account, $user, $privateKeyPath, $privateKey, $passphrase);
+        return new self($account, $user, $privateKeyPath, $privateKey, $passphrase, $accountIdentifierForJwt);
     }
 
     public function getToken(): string
@@ -62,7 +64,10 @@ final class JwtTokenProvider implements TokenProvider
         $privateKey = $this->loadPrivateKey();
         $publicKeyFingerprint = $this->getPublicKeyFingerprint($privateKey);
 
-        $accountIdentifier = strtoupper(str_replace('.', '-', $this->account));
+        // Snowflake JWT requires account identifier without region
+        $accountIdentifier = $this->accountIdentifierForJwt !== null && $this->accountIdentifierForJwt !== ''
+            ? strtoupper($this->accountIdentifierForJwt)
+            : strtoupper(explode('.', $this->account)[0]);
         $userIdentifier = strtoupper($this->user);
 
         $now = time();
