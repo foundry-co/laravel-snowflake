@@ -72,7 +72,7 @@ class SnowflakeConnection extends Connection
         ];
     }
 
-    public function select($query, $bindings = [], $useReadPdo = true): array
+    public function select($query, $bindings = [], $useReadPdo = true, array $fetchUsing = []): array
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
@@ -85,7 +85,7 @@ class SnowflakeConnection extends Connection
         });
     }
 
-    public function cursor($query, $bindings = [], $useReadPdo = true): Generator
+    public function cursor($query, $bindings = [], $useReadPdo = true, array $fetchUsing = []): Generator
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending()) {
