@@ -286,6 +286,11 @@ class SnowflakeConnection extends Connection
         return $this->getPdo();
     }
 
+    protected function escapeString($value): string
+    {
+        return "'" . str_replace("'", "''", $value) . "'";
+    }
+
     public function disconnect(): void
     {
     }
